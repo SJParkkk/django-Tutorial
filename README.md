@@ -1,2 +1,2 @@
 # django-Tutorial
-django-tutorial
+django-tutorial CRUD
