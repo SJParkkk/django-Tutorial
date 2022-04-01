@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MyApp</title>
+</head>
+<script>
+    function onDisplay(){
+        document.getElementById("createDiv").style.display="block";
+    }
+    function onDisplayUpdate(){
+        document.getElementById("updateDiv").style.display="block";
+    }
+
+</script>
+<body>
+    <h1><a href='/'>OTT Platform</a></h1>
+    <input type="button" value="create new platform" onclick="onDisplay()">
+        <div id="createDiv" style="display: none">
+            <form action="/create/" method="post">
+                <p><input type="text" name="title" placeholder="title"></p>
+                <p><textarea name="body" placeholder="body"></textarea></p>
+                <p><input type="submit"></p>
+            </form>
+        </div>
+    <ol>
+        {% for topic in topics %}
+            <li><a href="/read/{{topic.id}}">{{topic.title}}</a></li>
+        {% endfor %}
+    </ol>
+
+        <h2>{{ article.title }}</h2>
+        {{ article.body }}
+    <ul>
+        {%if id %}
+            <form action="/delete/" method="post">
+                <input type="hidden" name= "id" value={{id}}>
+                <input type="submit" value="delete">
+            </form>
+
+            <input type="button" href="/update/{{id}}"  value="update" onclick="onDisplayUpdate()">
+            <div id="updateDiv" value="update" style="display: none">
+                <form action="/update/{{id}}" method="post">
+                    <p><input type="text" name="title" placeholder="title" value=" {{ article.title }}"></p>
+                    <p><textarea name="body" placeholder="body">{{article.body}}</textarea></p>
+                    <p><input type="submit"></p>
+                </form>
+            </div>
+        {% endif %}
+    </ul>
+
+</body>
+</html>

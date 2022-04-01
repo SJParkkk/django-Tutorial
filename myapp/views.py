@@ -1,7 +1,6 @@
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 
-# Create your views here.
 from django.views.decorators.csrf import csrf_exempt
 
 nextId = 5
@@ -13,64 +12,44 @@ topics = [
 ]
 
 
-def HTMLTemplate(articleTag, id=None):
-    global topics
-    contextUI = f'''
-                <li>
-                    <form action="/delete/" method="post">
-                        <input type="hidden" name= "id" value={id}>
-                        <input type="submit" value="delete">
-                    </form>
-                </li>
-                <li><a href="/update/{id}">update</a></li>
-                ''' if id else ''
-    ol = ''
-    for topic in topics:
-        ol += f'<li><a href="/read/{topic["id"]}">{topic["title"]}</a></li>'
-    return HttpResponse(f'''
-        <html>
-        <body>
-            <h1><a href='/'>OTT Platform</a><h1/>
-            <ol>
-                {ol}
-            </ol>
-            {articleTag}
-            <ul>
-                <li><a href='/create'>create</a></li>
-                {contextUI}
-            </ul>
-        </body>
-        </html>
-        ''')
-
-
 def index(request):
-    article = """
-    <h2>Welcome</h2>
-    Hello, Ott
-    """
-    return HttpResponse(HTMLTemplate(article))
+    context = {
+        'article': {'title': 'Welcome', 'body': 'Hello, ott'},
+        'topics': topics
+    }
+    return render(request, 'home.html', context)
 
 
 def read(request, id):
     global topics
-    articles = [f'<h2>{topic["title"]}</h2>{topic["body"]}'for topic in topics if topic["id"] == int(id)]
-    return HttpResponse(HTMLTemplate(articles[0], id))
+    selected_title = None
+    selected_body = None
+    for topic in topics:
+        if topic["id"] == int(id):
+            selected_title, selected_body = topic["title"], topic["body"]
+    context = {
+        'article': {'title': selected_title, 'body': selected_body},
+        'topics': topics,
+        'id': id
+    }
+    return render(request, 'home.html', context)
 
 
 @csrf_exempt
 def update(request, id):
     global topics
-    selected_topic = [topic for topic in topics if topic["id"] == int(id)][0]
+    selected_title = None
+    selected_body = None
+    for topic in topics:
+        if topic["id"] == int(id):
+            selected_title, selected_body = topic["title"], topic["body"]
     if request.method == 'GET':
-        article = f'''
-            <form action="/update/{id}" method="post">
-                <p><input type="text" name="title" placeholder="title" value="{selected_topic["title"]}"></p>
-                <p><textarea name="body" placeholder="body">{selected_topic["body"]}</textarea></p>
-                <p><input type="submit"></p>
-            </form>
-        '''
-        return HttpResponse(HTMLTemplate(article, id))
+        context = {
+            'article': {'title': selected_title, 'body': selected_body},
+            'topics': topics,
+            'id': id
+        }
+        return render(request, 'home.html', context)
     elif request.method == 'POST':
         title = request.POST["title"]
         body = request.POST["body"]
@@ -93,16 +72,7 @@ def delete(request):
 @csrf_exempt
 def create(request):
     global nextId
-    if request.method == 'GET':
-        article = '''
-            <form action="/create/" method="post">
-                <p><input type="text" name="title" placeholder="title"></p>
-                <p><textarea name="body" placeholder="body"></textarea></p>
-                <p><input type="submit"></p>
-            </form>
-        '''
-        return HttpResponse(HTMLTemplate(article))
-    elif request.method == 'POST':
+    if request.method == 'POST':
         title = request.POST["title"]
         body = request.POST["body"]
         new_topic = {"id": nextId, "title": title, "body": body}
@@ -110,6 +80,7 @@ def create(request):
         url = '/read/' + str(nextId)
         nextId += 1
         return redirect(url)
+
 
 
 
