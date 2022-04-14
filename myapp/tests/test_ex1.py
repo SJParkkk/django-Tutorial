@@ -6,7 +6,6 @@ import pytest
 # session   Run Once Per session
 
 
-
 @pytest.fixture(scope="module")
 def fixture_1():
     print('run-fixture-1')
@@ -17,6 +16,7 @@ def test_example(fixture_1):
     print('run_example_1')
     num = fixture_1
     assert 1 == num
+
 
 def test_example2(fixture_1):
     print('run_example_2')
